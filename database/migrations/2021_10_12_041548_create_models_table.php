@@ -13,16 +13,33 @@ class CreateModelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('models', function (Blueprint $table) {
+        Schema::create('meshes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('path');
-            $table->foreign('owner_id')
-            ->references('id')
-            ->on('users')
-            ->onUpdate('cascade')
-            ->onDelete('cascade');
+            $table->bigInteger('owner_id')->unsigned();
+            $table->foreign('owner_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
+        });
+
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('mesh_categories', function (Blueprint $table) {
+
+            $table->bigInteger('mesh_id')->unsigned();
+            $table->bigInteger('category_id')->unsigned();
+            $table->timestamps();
+
+            $table->primary(['mesh_id', 'category_id']);
+        });
+
+        Schema::table('mesh_categories', function ($table) {
+            $table->foreign('mesh_id')->references('id')->on('meshes')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('categories')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -33,6 +50,8 @@ class CreateModelsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('models');
+        Schema::dropIfExists('mesh_categories');
+        Schema::dropIfExists('categories');
+        Schema::dropIfExists('meshes');
     }
 }
